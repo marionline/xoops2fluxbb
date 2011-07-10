@@ -1,0 +1,70 @@
+/**
+ *------------------------------------------------------------------------
+ *	Migration de Xoops (CBB) vers punBB.
+ * Script php4 et + pour gros site.
+ * Lancement en ligne de commande conseillé ! ! !
+ * ========================================
+ *	 By Guillaume Kulakowski (LLaumgui)
+ *    (c) 2006.
+ *
+ *   Web : 	http://www.llaumgui.com
+ * 	 eMail : guillaume AT llaumgui DOT com
+ * ========================================
+ *	This program is free software; you can redistribute it and/or
+ *	modify it under the terms of the GNU General Public License
+ *	as published by the Free Software Foundation; either version 2
+ *	of the License, or (at your option) any later version.
+ *	
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU General Public License for more details.
+ *	
+ *	You should have received a copy of the GNU General Public License
+ *	along with this program; if not, 
+ *	 - write to the Free Software
+ *	 		Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *		- See http://www.gnu.org/licenses/gpl.html
+ *--------------------------------------------------------------------------  */
+
+
+Pré requis :
+----------
+
+	* php4 ou supérieur.
+	* php-cli pour lancer le script en ligne de commande.
+	Je n'ai pas testé avec un navigateur mais ça doit marcher quand même ;).
+	* Quelques connaissances en php.
+
+
+
+Licence :
+-------
+
+Gnu/GPL, vous pouvez donc l'adapter au besoin, il est fait pour ça.
+
+
+Concrètement ce script convertie :
+--------------------------------
+	* Les groupes de membres : Les permissions seront les mêmes pour tous les groupes.
+	Elles seront donc à modifier par la suite.
+	* Les membres :
+		- Xoops autorisant plusieurs groupes pour un seul membre, ce que punBB ne fais pas, les membres sont tous mis dans le même groupe, membres (id=4). 
+		- Autre petites subtilité de punBB, le membre à l'identifiant 1 est l'invité, il faut donc ne pas avoir de membre avec un uid=1 sous Xoops. Si c'est votre cas, vous devrez faire une petite moulinette en modifiant mon script.
+		- Les avatars, il faut tous les mettre dans le bon dossiers (img/avatars).
+	* Les catégories.
+	* Les forums.
+	* Les topics
+	* Les postes : Ca c'est le gros morceau, il y a un traitement par lots pour les grosse bases.
+
+
+Plus d'infos :
+------------
+
+http://www.llaumgui.com/post/Version-finale-du-script-de-migration-de-Xoops-vers-punBB 
+	
+	
+	
+	
+	
+	 
