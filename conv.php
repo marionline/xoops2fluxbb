@@ -36,31 +36,28 @@
 class Xoops2punBB {
 
 	/*
-  	 * Configuration :
+	 * Configuration :
 	 */
-	var $CONF		= array(		// MySQL :
-										'db_host'   	=> 'localhost',		// Adresse de la base de données
-										'db_login'  	=> 'XXX',			// Identifiant à cette base.
-										'db_pass'   	=> 'XXXXXX',			// Mot de passe de la base.
-										'db_name'   	=> 'XXXXXX',			// Nom de la base.
+	var $CONF= array(	
+		// MySQL :
+		'db_host'      => 'localhost', // Adresse de la base de données
+		'db_login'     => 'conv',      // Identifiant à cette base.
+		'db_pass'      => 'convpass',  // Mot de passe de la base.
+		'db_name'      => 'FOL2',      // Nom de la base.
 
-										'punbb_prefix'	=> 'punbb_',
-										'xoops_prefix'	=> 'xoops_',
+		'punbb_prefix' => 'fluxbb_',
+		'xoops_prefix' => 'xoops_',
 
-										// Debug :
-										'debug_mod' 	=> false,					// Activation/désactivation.
-									
-										// Convertion des groupes :
-										'groupid'		=> array (	2 => 4,
-																			6 => 2
-																		),
-										/*
-										 * Options :
-										 */
-										'language'		=> 'French',				// Langage par défaut des membres
-										'style'			=> 'Oxygen',				// Style par défaut des membres (Oxygen)
-								
-									);
+		// Debug :
+		'debug_mod'    => false,       // Activation/ désactivation.
+
+		// Convertion des groupes :
+		'groupid'      => array ( 2 => 4, 6 => 2 ),
+
+		// Options :
+		'language'    => 'French',    // Langage par défaut des membres
+		'style'       => 'Oxygen',    // Style par défaut des membres (Oxygen)
+	);
 
 
 
@@ -125,13 +122,13 @@ class Xoops2punBB {
  										'g_read_board'					=> 1,
  										'g_post_replies'				=> 1,
  										'g_post_topics'				=> 1,
- 										'g_post_polls'					=> 1,
+										//'g_post_polls'					=> 1,
  										'g_edit_posts'					=> 1,
  										'g_delete_posts'				=> 1,
  										'g_delete_topics'				=> 1,
  										'g_set_title'					=> 0,
  										'g_search_users'				=> 1,
- 										'g_edit_subjects_interval'	=> 300,
+										//'g_edit_subjects_interval'	=> 300,
  										'g_post_flood'					=> 60,
  										'g_search_flood'				=> 30,
  					);
@@ -151,7 +148,7 @@ class Xoops2punBB {
  	 */
  	function convMember () {
  			 
- 		$this->emptyTable( "users", "WHERE id > 1" );
+ 		$this->emptyTable( "users", "WHERE id >= 1" );
  
  		$query = $this->query( "SELECT * FROM ".$this->CONF['xoops_prefix']."users ORDER BY uid" );
  			
@@ -189,12 +186,12 @@ class Xoops2punBB {
  										'aim'							=> $this->parseString( $member['user_aim'] ),
   										'yahoo'						=> $this->parseString( $member['user_yim'] ),			
 										'location'					=> $this->parseString( $member['user_from'] ),
-										'use_avatar'				=> $use_avatar,
+										//'use_avatar'				=> $use_avatar,
 										'signature'					=> $this->parseString( $member['user_sig'] ),	
 										'disp_topics'				=> 'NULL',		
 										'disp_posts'				=> 'NULL',
 										'email_setting'			=> 1,
-										'save_pass'					=> 1,
+										//'save_pass'					=> 1,
 										'notify_with_post'		=> 0,
 										'show_smilies'				=> 1,
 										'show_img'					=> 1,
@@ -600,7 +597,8 @@ class Xoops2punBB {
  	 */
  	 function parseString ( $string) {
 		
-		return str_replace( "'", "''", stripslashes($string));
+		 //return str_replace( "'", "''", stripslashes($string));
+		 return mysql_escape_string($string);
 	}
 
 
