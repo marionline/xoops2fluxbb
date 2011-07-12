@@ -1,0 +1,25 @@
+# Activate RewriteEngine
+RewriteEngine On
+
+# Change it to your server settings
+RewriteBase /~mario/FOL2
+
+# Don't show htaccess
+RewriteRule ^\.htaccess$ - [F]
+
+# If file or directory request are present don't rewrite URL
+RewriteCond %{REQUEST_FILENAME} -s [OR]
+RewriteCond %{REQUEST_FILENAME} -l [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^.*$ - [NC,L]
+
+# Rewrite Rule for viewtopic.php
+RewriteCond %{QUERY_STRING} ^((.*)topic_id=([0-9]*))*((.*)post_id=([0-9]*))*
+RewriteRule ^(.*)viewtopic.php(.*)$ fluxbb/viewtopic.php?id=%3&pid=%6 [NC,L,R=301]
+
+# Rewrite Rule for viewforum.php
+RewriteCond %{QUERY_STRING} forum=([0-9]*)
+RewriteRule ^(.*)viewforum.php(.*)$ fluxbb/viewforum.php?id=%1 [NC,L,R=301]
+
+# If no matched found redirect to fluxbb index
+RewriteRule ^.*$ fluxbb/ [NC,L,R=301]
