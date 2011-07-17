@@ -1,11 +1,12 @@
 /**
  *------------------------------------------------------------------------
- *	Migration de Xoops (CBB) vers punBB.
- * Script php4 et + pour gros site.
- * Lancement en ligne de commande conseillé ! ! !
+ * Migration from Xoops (CBB) to FloxBB.
+ *
  * ========================================
  *	 By Guillaume Kulakowski (LLaumgui)
  *    (c) 2006.
+ *	 And Mario Santagiuliana
+ *    (c) 2011.
  *
  *   Web : 	http://www.llaumgui.com
  * 	 eMail : guillaume AT llaumgui DOT com
@@ -22,30 +23,27 @@
  *	
  *	You should have received a copy of the GNU General Public License
  *	along with this program; if not, 
- *	 - write to the Free Software
+ *	- write to the Free Software
  *	 		Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- *		- See http://www.gnu.org/licenses/gpl.html
- *--------------------------------------------------------------------------  */
+ *	- See http://www.gnu.org/licenses/gpl.html
+ *--------------------------------------------------------------------------*/
 
 
-Pré requis :
-----------
+Requirements :
 
-	* php4 ou supérieur.
-	* php-cli pour lancer le script en ligne de commande.
-	Je n'ai pas testé avec un navigateur mais ça doit marcher quand même ;).
-	* Quelques connaissances en php.
-
+	* php4 or plus.
+	* php-cli to run the script using command line.
+	The script work using a browser but output is better on a shell.
+	* Little knowlage of php.
 
 
 Licence :
--------
 
-Gnu/GPL, vous pouvez donc l'adapter au besoin, il est fait pour ça.
+Gnu/GPL version 3.
 
 
 Concrètement ce script convertie :
---------------------------------
+
 	* Les groupes de membres : Les permissions seront les mêmes pour tous les groupes.
 	Elles seront donc à modifier par la suite.
 	* Les membres :
@@ -58,13 +56,13 @@ Concrètement ce script convertie :
 	* Les postes : Ca c'est le gros morceau, il y a un traitement par lots pour les grosse bases.
 
 
-Plus d'infos :
+More info about the conversion of Xoops cbb forum to punBB (the first script) :
 ------------
 
 http://www.llaumgui.com/post/Version-finale-du-script-de-migration-de-Xoops-vers-punBB 
-	
-	
-	
-	
-	
-	 
+
+
+TODO:
+* translate French comment in English;
+* check the correct mapping of conversion from old cbb table to fluxbb table;
+* create documentation.
