@@ -1,4 +1,4 @@
-Migration from Xoops (CBB) to FloxBB.
+Migration from Xoops (CBB) to FluxBB.
 =====================================
 
 Base on xoops2punbb
@@ -10,13 +10,13 @@ eMail : guillaume AT llaumgui DOT com .
 Requirements:
 --------------
 
-* php4 or plus.
-* php-cli to run the script using command line.
+* php5 or plus.
+* php-cli if you want to run the script using command line.
 The script work using a browser but output is better on a shell.
 * Little knowlage of php.
 
 
-Licence :
+License :
 ---------
 
 Gnu/GPL version 3.
@@ -59,5 +59,7 @@ TODO:
 -----
 * translate French comment in English
 * check the correct mapping of conversion from old cbb table to fluxbb table
+	- need to check users conversion and groups;
+	- add conversion for ban user;
 * create documentation
 * check if fluxbb permit multiple groups on one member
