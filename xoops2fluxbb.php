@@ -165,22 +165,23 @@ class Xoops2punBB {
 			 * Avatars :
 			 */
 			if ( $member['user_avatar'] == '' || $member['user_avatar'] == 'blank.gif' ) {
-				$use_avatar = 0;
+				$show_avatars = 0;
 			} else {
-				$use_avatar = 1;
-				$avatar		= explode('.', $member['user_avatar']);
-				/* rename( 	'../img/avatars/'.$member['user_avatar'], 
-							'../img/avatars/'.$member['uid'].'.'.$avatar[1] ); */
+				$show_avatars = 1;
+				// Need to complete or create another function
+				//$avatar = explode('.', $member['user_avatar']);
+				/* rename('../img/avatars/'.$member['user_avatar'], 
+				   '../img/avatars/'.$member['uid'].'.'.$avatar[1] ); */
 			}
 
 			/*
-			 * Dernier post :
+			 * Last post :
 			 */
-			$lastPost = $this->getLastPostMember( $member['uid']);
+			$lastPost = $this->getLastPostMember( $member['uid'] );
 
 			$tab = array(
 				'id'               => $member['uid'],
-				'group_id'         => 4,
+				'group_id'         => 4, // Need a function to convert user xoops groups id to one fluxbb group id
 				'username'         => $this->parseString( $member['uname'] ),
 				'password'         => $member['pass'],
 				'email'            => $this->parseString( $member['email'] ),
@@ -193,22 +194,21 @@ class Xoops2punBB {
 				'aim'              => $this->parseString( $member['user_aim'] ),
 				'yahoo'            => $this->parseString( $member['user_yim'] ),
 				'location'         => $this->parseString( $member['user_from'] ),
-				//'use_avatar'     => $use_avatar,
 				'signature'        => $this->parseString( $member['user_sig'] ),
 				'disp_topics'      => 'NULL',
 				'disp_posts'       => 'NULL',
 				'email_setting'    => 1,
-				//'save_pass'      => 1,
 				'notify_with_post' => 0,
+				'auto_notify'      => 0,
 				'show_smilies'     => 1,
 				'show_img'         => 1,
 				'show_img_sig'     => 1,
-				'show_avatars'     => 1,
+				'show_avatars'     => $show_avatars,
 				'show_sig'         => 1,
 				'timezone'         => 0,
 				'language'         => $this->_config['language'],
 				'style'            => $this->_config['style'],
-				'num_posts'        => $this->countPostMember( $member['uid']),
+				'num_posts'        => $this->countPostMember( $member['uid'] ),
 				'last_post'        => $lastPost['post_time'],
 				'registered'       => $member['user_regdate'],
 				'registration_ip'  => '0.0.0.0',
@@ -414,24 +414,25 @@ class Xoops2punBB {
  		if ($show == 1) return 0;
  	}
 
-
-
 	/**
- 	 * Nombre de postes d'un membres.
- 	 * @author Guillaume Kulakowski <guillaume AT llaumgui DOT com>
+	 * countPostMember 
+	 * Retrive the number of posts of a member
+	 * 
+	 * @author Guillaume Kulakowski <guillaume AT llaumgui DOT com>
 	 * @since 0.1
-	 * @param int	$uid 	Id du membre.
-	 * @return int Nombre de postes.
+	 * @param int $uid Member id
+	 * @access public
+	 * @return int Posts number
 	 */
- 	function countPostMember ($uid) {
- 		
- 		$count 	= $this->query("	SELECT count(*) as count
- 											FROM ".$this->_config['xoops_prefix']."bb_posts
- 											WHERE uid = $uid");
- 		$count	= $this->fetch_array($count);
- 		
- 		return $count['count'];
- 	}	 
+	public function countPostMember( $uid ) {
+
+		$count = $this->query( "SELECT count(*) as count
+								FROM " . $this->_config['xoops_prefix'] . "bb_posts
+								WHERE uid = $uid");
+		$count = $this->fetch_array($count);
+
+		return $count['count'];
+	}
 
 
 
@@ -470,31 +471,35 @@ class Xoops2punBB {
  		return $count['count'];
  	}
 
- 
- 
-  	/**
- 	 * Récupération des infos sur le dernier post du membre.
- 	 * @author Guillaume Kulakowski <guillaume AT llaumgui DOT com>
+	/**
+	 * getLastPostMember 
+	 * Retrive info for the last post of a member
+	 * 
+	 * @author Guillaume Kulakowski <guillaume AT llaumgui DOT com>
 	 * @since 0.1
-	 * @param int	$uid 	id du membre.
-	 * @return int Informations sur le dernier poste d'un membre.
+	 * @param int $uid Member id
+	 * @access public
+	 * @return int
 	 */
- 	function getLastPostMember ($uid) {
- 		
- 		$get 	= $this->query("	SELECT *
- 										FROM ".$this->_config['xoops_prefix']."bb_posts
- 										WHERE uid = $uid
- 											AND post_id=(	SELECT MAX(post_id)
- 																	FROM ".$this->_config['xoops_prefix']."bb_posts
- 																	WHERE uid = $uid
- 																	GROUP BY uid)	");
- 		$get	= $this->fetch_array($get);
+	public function getLastPostMember( $uid ) {
+
+		$get = $this->query( "
+					SELECT *
+					FROM " . $this->_config['xoops_prefix'] . "bb_posts
+					WHERE uid = $uid
+					AND post_id=(
+						SELECT MAX(post_id)
+						FROM " . $this->_config['xoops_prefix'] . "bb_posts
+						WHERE uid = $uid
+						GROUP BY uid
+					)
+				" );
+		$get = $this->fetch_array( $get );
 
 		return $get;
- 	}
- 	 
- 
-  
+	}
+
+
   	/**
  	 * Récupération des infos sur le dernier post d'un forum.
  	 * @author Guillaume Kulakowski <guillaume AT llaumgui DOT com>

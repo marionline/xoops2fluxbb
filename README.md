@@ -58,8 +58,9 @@ http://www.llaumgui.com/post/Version-finale-du-script-de-migration-de-Xoops-vers
 TODO:
 -----
 * translate French comment in English
-* check the correct mapping of conversion from old cbb table to fluxbb table
+* check the correct mapping of conversion from old xoops table (cbb also) to fluxbb table
 	- need to check users conversion and groups;
 	- add conversion for ban user;
 * create documentation
-* check if fluxbb permit multiple groups on one member
+* create a function to update group id of users and which group id use if a users has got multiple groups
+* create function to convert xoops avatars to fluxbb avatars
