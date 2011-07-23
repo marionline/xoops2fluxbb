@@ -149,12 +149,15 @@ class Xoops2punBB {
 	}
 
 	/**
-	 * Convertion des membres.
-	 * Penser à mettre les avatars dans le dossier img/avatars/ et y donnner les bons droits.
+	 * convMember 
+	 * Member conversion, need to review avatars move and groupid of all users.
+	 * 
 	 * @author Guillaume Kulakowski <guillaume AT llaumgui DOT com>
 	 * @since 0.1
+	 * @access public
+	 * @return void
 	 */
-	function convMember () {
+	public function convMember () {
 
 		$this->emptyTable( "users", "WHERE id >= 1" );
 
@@ -221,68 +224,75 @@ class Xoops2punBB {
 			$this->query( $this->buidInsert( 'users', $tab ) );
 		}
 
-		echo "Migration members DONE." . PHP_EOL . PHP_EOL;
+		echo "Migration members DONE. All Users are in Member Users, groupid 4." . PHP_EOL . PHP_EOL;
 	}
 
-
-
 	/**
- 	 * Convertion des catégories.
- 	 * @author Guillaume Kulakowski <guillaume AT llaumgui DOT com>
+	 * convCategory 
+	 * Categories conversion.
+	 * 
+	 * @author Guillaume Kulakowski <guillaume AT llaumgui DOT com>
 	 * @since 0.1
- 	 */
- 	function convCategory () {
- 	
- 		$this->emptyTable( "categories" );
- 		
- 		$query = $this->query( "SELECT * FROM ".$this->_config['xoops_prefix']."bb_categories ORDER BY cat_id" );
- 			
- 		while ( $cat = $this->fetch_array($query) ) {
-			
-			$tab =	array(	'id' 								=> $cat['cat_id'],
- 									'cat_name'						=> $this->parseString( $cat['cat_title'] ),
-				 					'disp_position'				=> $cat['cat_order'],
+	 * @access public
+	 * @return void
+	 */
+	public function convCategory () {
 
- 								);
- 			$this->query( $this->buidInsert( 'categories', $tab) );
- 		}
- 		echo "Catégories migrés.\n\n";					
+		$this->emptyTable( "categories" );
+
+		$query = $this->query( "SELECT * FROM " . $this->_config['xoops_prefix'] . "bb_categories ORDER BY cat_id" );
+
+		while ( $cat = $this->fetch_array($query) ) {
+			$tab = array(
+				'id'            => $cat['cat_id'],
+				'cat_name'      => $this->parseString( $cat['cat_title'] ),
+				'disp_position' => $cat['cat_order'], 
+			);
+
+			$this->query( $this->buidInsert( 'categories', $tab ) );
+		}
+
+		echo "Categories migration DONE." . PHP_EOL . PHP_EOL;
 	}
 
-
-
 	/**
- 	 * Convertion forums.
- 	 * @author Guillaume Kulakowski <guillaume AT llaumgui DOT com>
+	 * convForum 
+	 * Forum conversion
+	 * 
+	 * @author Guillaume Kulakowski <guillaume AT llaumgui DOT com>
 	 * @since 0.1
- 	 */
- 	function convForum () {
- 	
- 		$this->emptyTable( "forums" );
- 		
- 		$query = $this->query( "SELECT * FROM ".$this->_config['xoops_prefix']."bb_forums ORDER BY forum_id" );
- 			
- 		while ( $forum = $this->fetch_array($query) ) {
- 		
-			$lastPost	 = $this->getLastPostForum( $forum['forum_id'] );
-			
-			$tab =	array(	'Id' 								=> $forum['forum_id'],
-									'forum_name'  					=> $this->parseString( $forum['forum_name'] ),
-									'forum_desc' 					=> $this->parseString( $forum['forum_desc'] ),
-									'redirect_url'					=> 'NULL',
-									'moderators' 					=> 'NULL',
-									'num_topics' 					=> $this->countForumTopic( $forum['forum_id'] ),
-									'num_posts' 					=> $this->countForumPost( $forum['forum_id'] ),
-									'last_post' 					=> $lastPost['post_time'],
-									'last_post_id' 				=> $lastPost['post_id'],
-									'last_poster' 					=> $this->parseString( $lastPost['uname'] ),
-									'sort_by' 						=> 0,
-									'disp_position' 				=> $forum['forum_order'],
-									'cat_id'							=> $forum['cat_id'],
- 								);
- 			$this->query( $this->buidInsert( 'forums', $tab) );
- 		}
- 		echo "Forums migrés.\n\n";		
+	 * @access public
+	 * @return void
+	 */
+	public function convForum () {
+
+		$this->emptyTable( "forums" );
+
+		$query = $this->query( "SELECT * FROM " . $this->_config['xoops_prefix'] . "bb_forums ORDER BY forum_id" );
+
+		while ( $forum = $this->fetch_array($query) ) {
+
+			$lastPost = $this->getLastPostForum( $forum['forum_id'] );
+
+			$tab = array(
+				'Id'            => $forum['forum_id'],
+				'forum_name'    => $this->parseString( $forum['forum_name'] ),
+				'forum_desc'    => $this->parseString( $forum['forum_desc'] ),
+				'redirect_url'  => 'NULL',
+				'moderators'    => 'NULL',
+				'num_topics'    => $this->countForumTopic( $forum['forum_id'] ),
+				'num_posts'     => $this->countForumPost( $forum['forum_id'] ),
+				'last_post'     => $lastPost['post_time'],
+				'last_post_id'  => $lastPost['post_id'],
+				'last_poster'   => $this->parseString( $lastPost['uname'] ),
+				'sort_by'       => 0,
+				'disp_position' => $forum['forum_order'],
+				'cat_id'        => $forum['cat_id'],
+			);
+
+			$this->query( $this->buidInsert( 'forums', $tab ) );
+		}
+		echo "Forums migration DONE." . PHP_EOL . PHP_EOL;
 	}
 
 
@@ -434,42 +444,43 @@ class Xoops2punBB {
 		return $count['count'];
 	}
 
-
-
 	/**
- 	 * Nombre de topic d'un forum.
- 	 * @author Guillaume Kulakowski <guillaume AT llaumgui DOT com>
+	 * countForumTopic 
+	 * Number of topic in a forum.
+	 * 
+	 * @author Guillaume Kulakowski <guillaume AT llaumgui DOT com>
 	 * @since 0.1
-	 * @param int	$forum_id 	id du forum.
-	 * @return int Nombre de topics.
+	 * @param int $forum_id 
+	 * @access public
+	 * @return int Number of topics
 	 */
- 	function countForumTopic ($forum_id) {
- 		
- 		$count 	= $this->query("	SELECT count(*) as count
- 											FROM ".$this->_config['xoops_prefix']."bb_topics
- 											WHERE forum_id  = $forum_id ");
- 		$count	= $this->fetch_array($count);
- 		
- 		return $count['count'];
- 	}	 
- 	
- 	
- 	
+	public function countForumTopic( $forum_id ) {
+		$count = $this->query("SELECT count(*) as count
+								FROM " . $this->_config['xoops_prefix'] . "bb_topics
+								WHERE forum_id  = $forum_id ");
+		$count = $this->fetch_array($count);
+
+		return $count['count'];
+	}
+	
 	/**
- 	 * Nombre de post d'un forum.
- 	 * @author Guillaume Kulakowski <guillaume AT llaumgui DOT com>
+	 * countForumPost 
+	 * Number of posts in a forum
+	 * 
+	 * @author Guillaume Kulakowski <guillaume AT llaumgui DOT com>
 	 * @since 0.1
-	 * @param int	$forum_id 	id du forum.
-	 * @return int Nombre de postes.
+	 * @param mixed $forum_id 
+	 * @access public
+	 * @return int Number of posts
 	 */
- 	function countForumPost ($forum_id) {
- 		
- 		$count 	= $this->query("	SELECT count(*) as count
- 											FROM ".$this->_config['xoops_prefix']."bb_posts
- 											WHERE forum_id  = $forum_id ");
- 		$count	= $this->fetch_array($count);
- 		return $count['count'];
- 	}
+	public function countForumPost( $forum_id ) {
+		$count = $this->query("SELECT count(*) as count
+								FROM " . $this->_config['xoops_prefix'] . "bb_posts
+								WHERE forum_id  = $forum_id ");
+		$count = $this->fetch_array($count);
+
+		return $count['count'];
+	}
 
 	/**
 	 * getLastPostMember 
@@ -499,43 +510,48 @@ class Xoops2punBB {
 		return $get;
 	}
 
-
-  	/**
- 	 * Récupération des infos sur le dernier post d'un forum.
- 	 * @author Guillaume Kulakowski <guillaume AT llaumgui DOT com>
+	/**
+	 * getLastPostForum 
+	 * Recovery information about last post of a forum
+	 * 
+	 * @author Guillaume Kulakowski <guillaume AT llaumgui DOT com>
 	 * @since 0.1
-	 * @param int	$forum_id 	forum_id du forum.
-	 * @return int Information sur le dernier postes.
+	 * @param int $forum_id 
+	 * @access public
+	 * @return int
 	 */
- 	function getLastPostForum ($forum_id) {
- 		
- 		$qGet = $this->query("	SELECT post_id, p.post_time, u.uname, p.uid
- 										FROM ".$this->_config['xoops_prefix']."bb_posts p
- 											LEFT JOIN ".$this->_config['xoops_prefix']."users u ON p.uid = u.uid
- 										WHERE forum_id = $forum_id
- 										 	AND p.post_id=(	SELECT MAX(post_id)
- 																	FROM ".$this->_config['xoops_prefix']."bb_posts
- 																	WHERE forum_id = $forum_id
- 																	GROUP BY forum_id)	");
- 		$get	= $this->fetch_array($qGet);
+	public function getLastPostForum( $forum_id ) {
 
-		// Cas de l'invité : 		
- 		if ( $get['uid'] == 0 ) {
- 			$get['uid'] 	= 1;
- 			$get['uname'] 	= utf8_decode('Invité');
- 		}
- 		
-		// Cas du forum sans topic : 		
- 		if ( $this->num_rows($qGet) == 0 ) {
- 			$get['uid'] 	= 'NULL';
- 			$get['uname'] 	= 'NULL';
- 			$get['post_id'] 	= 'NULL';
- 			$get['post_time'] 	= 'NULL';
- 		} 
+		$qGet = $this->query("SELECT post_id, p.post_time, u.uname, p.uid
+								FROM " . $this->_config['xoops_prefix'] . "bb_posts p
+								LEFT JOIN " . $this->_config['xoops_prefix'] . "users u ON p.uid = u.uid
+								WHERE forum_id = $forum_id
+								AND p.post_id=(
+									SELECT MAX(post_id)
+									FROM " . $this->_config['xoops_prefix'] . "bb_posts
+									WHERE forum_id = $forum_id
+									GROUP BY forum_id
+								)
+							");
 
- 		return $get;
- 	}
+		$get = $this->fetch_array($qGet);
 
+		// If the guest :
+		if ( $get['uid'] == 0 ) {
+			$get['uid']   = 1;
+			$get['uname'] = utf8_decode('Guest');
+		}
+
+		// If no forum topic :
+		if ( $this->num_rows($qGet) == 0 ) {
+			$get['uid']       = 'NULL';
+			$get['uname']     = 'NULL';
+			$get['post_id']   = 'NULL';
+			$get['post_time'] = 'NULL';
+		} 
+
+		return $get;
+	}
 
 
   	/**
