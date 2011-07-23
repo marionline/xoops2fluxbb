@@ -292,43 +292,50 @@ class Xoops2punBB {
 
 			$this->query( $this->buidInsert( 'forums', $tab ) );
 		}
+
 		echo "Forums migration DONE." . PHP_EOL . PHP_EOL;
 	}
 
-
-
 	/**
- 	 * Convertion des topics.
- 	 * @author Guillaume Kulakowski <guillaume AT llaumgui DOT com>
+	 * convTopic 
+	 * Topics conversion
+	 * 
+	 * @author Guillaume Kulakowski <guillaume AT llaumgui DOT com>
 	 * @since 0.1
- 	 */
- 	function convTopic () {
- 	
- 		$this->emptyTable( "topics" );
- 		
- 		$query = $this->query( "SELECT * FROM ".$this->_config['xoops_prefix']."bb_topics ORDER BY topic_id " );
- 			
- 		while ( $topic = $this->fetch_array($query) ) {
- 			$firstPost	 = $this->getFirstPostTopic( $topic['topic_id'] );
- 			$lastPost	 = $this->getLastPostTopic( $topic['topic_id'] );
-			
-			$tab =	array(	'id' 								=> $topic['topic_id'],
- 									'poster'							=> $this->parseString( $firstPost['uname'] ),
-				 					'subject'						=> $this->parseString( $topic['topic_title'] ),
-									'posted'							=> $topic['topic_time'],
-									'last_post'						=> $lastPost['post_time'],
-									'last_post_id'					=> $lastPost['post_id'],
-									'last_poster'					=> $this->parseString( $lastPost['uname'] ),
-									'num_views'						=> $topic['topic_views'],
-									'num_replies'					=> $topic['topic_replies'],
-				 					'closed'							=> $topic['topic_status'],
-				 					'sticky'							=> $topic['topic_sticky'],
-				 					'moved_to'						=> 'NULL',
-				 					'forum_id'						=> $topic['forum_id'],
- 								);
- 			$this->query( $this->buidInsert( 'topics', $tab) );
- 		}
-  		echo "Topics migrés.\n\n";		
+	 * @access public
+	 * @return void
+	 */
+	public function convTopic () {
+
+		$this->emptyTable( "topics" );
+
+		$query = $this->query( "SELECT * FROM " . $this->_config['xoops_prefix'] . "bb_topics ORDER BY topic_id" );
+
+		while ( $topic = $this->fetch_array($query) ) {
+			$firstPost = $this->getFirstPostTopic( $topic['topic_id'] );
+			$lastPost  = $this->getLastPostTopic( $topic['topic_id'] );
+
+			$tab = array(
+				'id'           => $topic['topic_id'],
+				'poster'       => $this->parseString( $firstPost['uname'] ),
+				'subject'      => $this->parseString( $topic['topic_title'] ),
+				'posted'       => $topic['topic_time'],
+				'first_post_id'=> $fistPost['post_id'];
+				'last_post'    => $lastPost['post_time'],
+				'last_post_id' => $lastPost['post_id'],
+				'last_poster'  => $this->parseString( $lastPost['uname'] ),
+				'num_views'    => $topic['topic_views'],
+				'num_replies'  => $topic['topic_replies'],
+				'closed'       => $topic['topic_status'],
+				'sticky'       => $topic['topic_sticky'],
+				'moved_to'     => 'NULL',
+				'forum_id'     => $topic['forum_id'],
+			);
+
+			$this->query( $this->buidInsert( 'topics', $tab ) );
+		}
+
+		echo "Topics migration DONE." . PHP_EOL . PHP_EOL;
 	}
 
 
@@ -553,65 +560,74 @@ class Xoops2punBB {
 		return $get;
 	}
 
-
-  	/**
- 	 * Récupération des infos sur le dernier post.
- 	 * @author Guillaume Kulakowski <guillaume AT llaumgui DOT com>
+	/**
+	 * getLastPostTopic 
+	 * Recovery information on the last post
+	 * 
+	 * @author Guillaume Kulakowski <guillaume AT llaumgui DOT com>
 	 * @since 0.1
-	 * @param int	$forum_id 	forum_id du forum.
-	 * @return int Nombre
+	 * @param mixed $topic_id 
+	 * @access public
+	 * @return array
 	 */
- 	function getLastPostTopic ($topic_id) {
- 		
- 		$get 	= $this->query("	SELECT post_id, p.post_time, u.uname, p.uid
- 										FROM ".$this->_config['xoops_prefix']."bb_posts p
- 											LEFT JOIN ".$this->_config['xoops_prefix']."users u ON p.uid = u.uid
- 										WHERE topic_id = $topic_id
- 										 	AND p.post_id=(	SELECT MAX(post_id)
- 																	FROM ".$this->_config['xoops_prefix']."bb_posts
- 																	WHERE topic_id = $topic_id
- 																	GROUP BY topic_id)	");
+	public function getLastPostTopic( $topic_id ) {
 
- 		$get	= $this->fetch_array($get);
- 		
- 		// Cas de l'invité : 		
- 		if ( $get['uid'] == 0 ) {
- 			$get['uid'] 	= 1;
- 			$get['uname'] 	= utf8_decode('Invité');
- 		}
+		$get = $this->query("SELECT post_id, p.post_time, u.uname, p.uid
+							FROM " . $this->_config['xoops_prefix'] . "bb_posts p
+							LEFT JOIN " . $this->_config['xoops_prefix'] . "users u ON p.uid = u.uid
+							WHERE topic_id = $topic_id
+							AND p.post_id=(SELECT MAX(post_id)
+											FROM " . $this->_config['xoops_prefix'] . "bb_posts
+											WHERE topic_id = $topic_id
+											GROUP BY topic_id
+										)
+							");
 
- 		return $get;
- 	}
+		$get = $this->fetch_array($get);
 
+		// If the guest :
+		if ( $get['uid'] == 0 ) {
+			$get['uid']   = 1;
+			$get['uname'] = utf8_decode('Guest');
+		}
 
+		return $get;
+	}
 
-  	/**
- 	 * Récupération des infos sur le dernier post.
- 	 * @author Guillaume Kulakowski <guillaume AT llaumgui DOT com>
+	/**
+	 * getFirstPostTopic 
+	 * Recovery information on the first post
+	 * 
+	 * @author Guillaume Kulakowski <guillaume AT llaumgui DOT com>
 	 * @since 0.1
-	 * @param int	$forum_id 	forum_id du forum.
-	 * @return int Nombre
+	 * @param int $topic_id 
+	 * @access public
+	 * @return array
 	 */
- 	function getFirstPostTopic ($topic_id) {
- 		
- 		$get 	= $this->query("	SELECT post_id, p.post_time, u.uname, p.uid
- 										FROM ".$this->_config['xoops_prefix']."bb_posts p
- 										LEFT JOIN ".$this->_config['xoops_prefix']."users u ON p.uid = u.uid
- 										WHERE topic_id = $topic_id
- 										 	AND p.post_id=(	SELECT MIN(post_id)
- 																	FROM ".$this->_config['xoops_prefix']."bb_posts
- 																	WHERE topic_id = $topic_id
- 																	GROUP BY topic_id)	");
- 		$get	= $this->fetch_array($get);
- 		
- 		// Cas de l'invité : 		
- 		if ( $get['uid'] == 0 ) {
- 			$get['uid'] 	= 1;
- 			$get['uname'] 	= utf8_decode('Invité');
- 		}
+	public function getFirstPostTopic( $topic_id ) {
 
- 		return $get;
- 	}
+		$get = $this->query("SELECT post_id, p.post_time, u.uname, p.uid
+							FROM " . $this->_config['xoops_prefix'] . "bb_posts p
+							LEFT JOIN " . $this->_config['xoops_prefix'] . "users u ON p.uid = u.uid
+							WHERE topic_id = $topic_id
+							AND p.post_id=(
+									SELECT MIN(post_id)
+									FROM " . $this->_config['xoops_prefix'] . "bb_posts
+									WHERE topic_id = $topic_id
+									GROUP BY topic_id
+								)
+							");
+
+		$get = $this->fetch_array($get);
+
+		// If the guest :
+		if ( $get['uid'] == 0 ) {
+			$get['uid']   = 1;
+			$get['uname'] = utf8_decode('Guest');
+		}
+
+		return $get;
+	}
 
 	/**
 	 * parseString 
