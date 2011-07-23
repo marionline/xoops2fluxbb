@@ -25,13 +25,13 @@
  */
 
 /**
- * Xoops2punBB 
+ * Xoops2fluxBB 
  * 
  * @package 
  * @author Mario Santagiuliana <mario@marionline.it> 
  * @license GPL Version 3.0 {@link http://www.gnu.org/licenses/gpl-3.0.txt}
  */
-class Xoops2punBB {
+class Xoops2fluxBB {
 
 	/**
 	 * _config 
@@ -114,7 +114,7 @@ class Xoops2punBB {
 	 * @access public
 	 * @return void
 	 */
-	public function convGroups () {
+	public function convGroups() {
 
 		$this->emptyTable( "groups", "WHERE g_id > 4" );
 		$query_result = $this->query( "SELECT * FROM " . $this->_config['xoops_prefix'] . "groups ORDER BY groupid" );
@@ -157,7 +157,7 @@ class Xoops2punBB {
 	 * @access public
 	 * @return void
 	 */
-	public function convMember () {
+	public function convMember() {
 
 		$this->emptyTable( "users", "WHERE id >= 1" );
 
@@ -236,7 +236,7 @@ class Xoops2punBB {
 	 * @access public
 	 * @return void
 	 */
-	public function convCategory () {
+	public function convCategory() {
 
 		$this->emptyTable( "categories" );
 
@@ -264,7 +264,7 @@ class Xoops2punBB {
 	 * @access public
 	 * @return void
 	 */
-	public function convForum () {
+	public function convForum() {
 
 		$this->emptyTable( "forums" );
 
@@ -305,7 +305,7 @@ class Xoops2punBB {
 	 * @access public
 	 * @return void
 	 */
-	public function convTopic () {
+	public function convTopic() {
 
 		$this->emptyTable( "topics" );
 
@@ -338,60 +338,64 @@ class Xoops2punBB {
 		echo "Topics migration DONE." . PHP_EOL . PHP_EOL;
 	}
 
-
-
 	/**
- 	 * Convertion des topics.
- 	 * La le SELECT * est un peu trop massif ! ! ! Donc je boucle plusieurs fois...
- 	 * @author Guillaume Kulakowski <guillaume AT llaumgui DOT com>
+	 * convPost 
+	 * Posts conversion.
+	 * The SELECT * is a little too solid! ! ! So I loop a few times...
+	 * 
+	 * @author Guillaume Kulakowski <guillaume AT llaumgui DOT com>
 	 * @since 0.1
- 	 */
- 	function convPost () {
- 	
- 		$this->emptyTable( "posts" );
- 		$nbPost	= '1000';		// traiter les postes par 1000.
- 		$i=0;
- 		 		 		
- 		$lQuery = $this->query( "SELECT MAX(post_id) as post_id FROM ".$this->_config['xoops_prefix']."bb_posts p ORDER BY p.post_id" );
- 		$maxId = $this->fetch_array($lQuery);
-		$maxId =	$maxId['post_id'];
+	 * @access public
+	 * @return void
+	 */
+	public function convPost() {
+
+		$this->emptyTable( "posts" );
+		$nbPost = '1000'; // traiter les postes par 1000.
+		$i = 0;
+
+		$lQuery = $this->query( "SELECT MAX(post_id) as post_id FROM " . $this->_config['xoops_prefix'] . "bb_posts p ORDER BY p.post_id" );
+		$maxId = $this->fetch_array($lQuery);
+		$maxId = $maxId['post_id'];
+
 		echo "\tMaxId = $maxId.\n";	
- 		
- 		while ( $i < $maxId ) {
- 			$query = $this->query( "SELECT * FROM ".$this->_config['xoops_prefix']."bb_posts p
- 												LEFT JOIN ".$this->_config['xoops_prefix']."bb_posts_text pt 	ON p.post_id=pt.post_id
- 												LEFT JOIN ".$this->_config['xoops_prefix']."users u					ON p.uid=u.uid
- 											WHERE p.post_id >= ".$i." AND p.post_id < ".($i+$nbPost)."
- 											ORDER BY p.post_id" );
- 			
-	 		while ( $post = $this->fetch_array($query) ) {		
-				$tab =	array(	'id' 								=> $post['post_id'],
-										'poster' 						=> $this->parseString( $post['uname'] ),
-										'poster_id'						=> $post['uid'],
-										'poster_ip'						=> long2ip($post['poster_ip']),
-										'poster_email'					=> 'NULL',
-										'message'						=> $this->parseString( $post['post_text'] ),
-										'hide_smilies'					=> $this->convertSmiles( $post['dosmiley'] ),
-										'posted'							=> $post['post_time'],
-										'edited'							=> 'NULL',
-										'edited_by'						=> 'NULL',
-										'topic_id'						=> $post['topic_id'],
-	 								);
-	 			$this->query( $this->buidInsert( 'posts', $tab) );
-	 		}
-	 		echo "\tPost $i à ".($i+$nbPost)." traités\n";
-	 		$i	= $i + $nbPost;
-	 	}
-	 	echo "Postes migrés.\n\n";						
+
+		while ( $i < $maxId ) {
+			$query = $this->query( "SELECT * FROM " . $this->_config['xoops_prefix'] . "bb_posts p
+				LEFT JOIN " . $this->_config['xoops_prefix'] . "bb_posts_text pt ON p.post_id=pt.post_id
+				LEFT JOIN " . $this->_config['xoops_prefix'] . "users u ON p.uid=u.uid
+				WHERE p.post_id >= " . $i . " AND p.post_id < " . ($i+$nbPost) . "
+				ORDER BY p.post_id" );
+
+			while ( $post = $this->fetch_array($query) ) {
+				$tab = array(
+					'id'           => $post['post_id'],
+					'poster'       => $this->parseString( $post['uname'] ),
+					'poster_id'    => $post['uid'],
+					'poster_ip'    => long2ip($post['poster_ip']),
+					'poster_email' => 'NULL',
+					'message'      => $this->parseString( $post['post_text'] ),
+					'hide_smilies' => $this->convertSmiles( $post['dosmiley'] ),
+					'posted'       => $post['post_time'],
+					'edited'       => 'NULL',
+					'edited_by'    => 'NULL',
+					'topic_id'     => $post['topic_id'],
+				);
+
+				$this->query( $this->buidInsert( 'posts', $tab ) );
+			}
+
+			echo "\tPost $i to ".($i+$nbPost)." converted\n";
+
+			$i = $i + $nbPost;
+		}
+
+		echo "Posts migration DONE." . PHP_EOL . PHP_EOL;
 	}
-
-
-
-
 
 /* ---------------------------------------------------------------------------
  *
- * Sous fonction utile pour la migration :
+ * Usefull function in migration process :
  *
  * -------------------------------------------------------------------------*/
 
@@ -416,20 +420,20 @@ class Xoops2punBB {
 		}
 	}
 
-
-
 	/**
- 	 * Convertion de hide et show smilies.
- 	 * @author Guillaume Kulakowski <guillaume AT llaumgui DOT com>
+	 * convertSmiles 
+	 * Convert smilies to hide and show.
+	 * 
+	 * @author Guillaume Kulakowski <guillaume AT llaumgui DOT com>
 	 * @since 0.1
-	 * @param boolean		$show 	Smilies affichés ?
-	 * @return boolean Smilies cachés ?
+	 * @param boolean $show Smiles posted?
+	 * @access protected
+	 * @return boolean
 	 */
- 	function convertSmiles ($show) {
- 		
- 		if ($show == 0) return 1;
- 		if ($show == 1) return 0;
- 	}
+	protected function convertSmiles( $show ) {
+		if ($show == 0) return 1;
+		if ($show == 1) return 0;
+	}
 
 	/**
 	 * countPostMember 
@@ -723,20 +727,22 @@ class Xoops2punBB {
 		}
 	}
 
-
 	/**
- 	 * Fonction mysql_num_rows.
- 	 * @author Guillaume Kulakowski <guillaume AT llaumgui DOT com>
+	 * num_rows 
+	 * mysql_num_rows wrapper
+	 * 
+	 * @author Guillaume Kulakowski <guillaume AT llaumgui DOT com>
 	 * @since 0.1
-	 * @param id$ query 	Requête.
- 	 */
-	function num_rows($query = "") {
-	
+	 * @param string $query Query request
+	 * @access protected
+	 * @return void
+	 */
+	protected function num_rows( $query = "" ) {
 		if ( empty($query) ) {
-			return mysql_num_rows ($this->_query);
+			return mysql_num_rows( $this->_query );
 		}
 		else {
-			return mysql_num_rows ($query);
+			return mysql_num_rows( $query );
 		}
 	}
 
@@ -773,8 +779,8 @@ class Xoops2punBB {
 
 
 /*
- * Appel :
+ * Call conversion :
  */
-$convertion = new Xoops2punBB();
+$convertion = new Xoops2fluxBB();
 
 ?>
