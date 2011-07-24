@@ -90,7 +90,7 @@ class Xoops2fluxBB {
 	 * @return void
 	 */
 	function __construct() {
-
+		$this->connect();
 	}
 
 	/**
@@ -103,7 +103,6 @@ class Xoops2fluxBB {
 	public function start() {
 	
 		// Open DB connection.
-		$this->connect();
 
 		// Start conversion
 		$this->convGroups();
@@ -112,9 +111,6 @@ class Xoops2fluxBB {
 		$this->convForum();
 		$this->convTopic();
 		$this->convPost();
-
-		// Close DB connection
-		$this->close();
 
 		echo "Migration DONE!" . PHP_EOL . "Now you can update groups of the user using updategroups method." . PHP_EOL;
 
@@ -237,6 +233,105 @@ class Xoops2fluxBB {
 		}
 
 		echo "Migration members DONE. All Users are in Member Users, groupid 4." . PHP_EOL . PHP_EOL;
+	}
+
+	/**
+	 * updateFirstUser 
+	 * Update user id 2 in Fluxbb
+	 * 
+	 * @param boolean $updateAvatar 
+	 * @param string $fluxbb_dir 
+	 * @access public
+	 * @return void
+	 */
+	public function updateFirstUser( $updateAvatar = false, $fluxbb_dir = null ) {
+
+		// First of all move user with id 2 in fluxbb table to the next last id
+		$result = $this->query( "SELECT uid FROM " . $this->_config['xoops_prefix'] . "users ORDER BY " . $this->_config['xoops_prefix'] . "users.uid DESC LIMIT 1" );
+		$lastuid = $this->fetch_array($result);
+		$lastuid = $lastuid['uid'] + 1;
+		$this->query( "UPDATE " . $this->_config['punbb_prefix'] . "users SET id=$lastuid WHERE id=2" );
+		// Update his posts
+		$this->query( "UPDATE " . $this->_config['punbb_prefix'] . "posts SET poster_id=$lastuid WHERE poster_id=2" );
+
+		$query_result = $this->query( "SELECT * FROM " . $this->_config['xoops_prefix'] . "users WHERE uid = 1 ORDER BY uid" );
+
+		$member = $this->fetch_array( $query_result );
+		/*
+		 * Avatars :
+		 */
+		if ( $member['user_avatar'] == '' || $member['user_avatar'] == 'blank.gif' ) {
+			$show_avatars = 0;
+		} else {
+			$show_avatars = 1;
+		}
+
+		/*
+		 * Last post :
+		 */
+		$lastPost = $this->getLastPostMember( $member['uid'] );
+
+		$tab = array(
+			'id'               => 2,
+			'group_id'         => 1,
+			'username'         => $this->parseString( $member['uname'] ),
+			'password'         => $member['pass'],
+			'email'            => $this->parseString( $member['email'] ),
+			'title'            => 'NULL',
+			'realname'         => $this->parseString( $member['name'] ),
+			'url'              => $this->parseString( $member['url'] ),
+			'jabber'           => 'NULL',
+			'icq'              => $this->parseString( $member['user_icq'] ),
+			'msn'              => $this->parseString( $member['user_msnm'] ),
+			'aim'              => $this->parseString( $member['user_aim'] ),
+			'yahoo'            => $this->parseString( $member['user_yim'] ),
+			'location'         => $this->parseString( $member['user_from'] ),
+			'signature'        => $this->parseString( $member['user_sig'] ),
+			'disp_topics'      => 'NULL',
+			'disp_posts'       => 'NULL',
+			'email_setting'    => 1,
+			'notify_with_post' => 0,
+			'auto_notify'      => 0,
+			'show_smilies'     => 1,
+			'show_img'         => 1,
+			'show_img_sig'     => 1,
+			'show_avatars'     => $show_avatars,
+			'show_sig'         => 1,
+			'timezone'         => 0,
+			'language'         => $this->_config['language'],
+			'style'            => $this->_config['style'],
+			'num_posts'        => $this->countPostMember( $member['uid'] ),
+			'last_post'        => $lastPost['post_time'],
+			'registered'       => $member['user_regdate'],
+			'registration_ip'  => '0.0.0.0',
+			'last_visit'       => $member['last_login'],
+			'admin_note'       => 'NULL',
+			'activate_string'  => 'NULL',
+			'activate_key'     => 'NULL',
+		);
+
+		$this->query( $this->buidInsert( 'users', $tab ) );
+
+		// Update his posts
+		$this->query( "UPDATE " . $this->_config['punbb_prefix'] . "posts SET poster_id=2 WHERE poster_id=1" );
+
+		// Update Avatar 
+		if( $updateAvatar ){
+
+			if( $fluxbb_dir === null && isset( $this->_config['fluxbb_dir'] ) )
+				$dir = $this->_config['fluxbb_dir'] . "/img/avatars/";
+			else
+				$dir = $fluxbb_dir . "/img/avatars/";
+
+			foreach( glob( $dir . "2.*") as $file ) {
+				copy( $file , str_replace( "/2.", "/$lastuid.", $file) );
+			}
+			foreach( glob( $dir . "1.*") as $file ) {
+				copy( $file , str_replace( "/1.", "/2.", $file) );
+			}
+		}
+
+		echo "User with id 2 is moved to the last id, user with id 1 in xoops is now Administrator in fluxbb";
 	}
 
 	/**
@@ -414,7 +509,6 @@ class Xoops2fluxBB {
 	 * @return void
 	 */
 	public function avatars( $xoops_dir = null, $fluxbb_dir = null ) {
-		$this->connect();
 
 		$error = '';
 
@@ -451,7 +545,6 @@ class Xoops2fluxBB {
 			echo "Avatars copy successfull from Xoops to Fluxbb." . PHP_EOL;
 		}
 
-		$this->close();
 	}
 
 	/**
@@ -463,7 +556,6 @@ class Xoops2fluxBB {
 	 * @return void
 	 */
 	public function updategroups() {
-		$this->connect();
 
 		// Find users that are in more than one group
 		$result = $this->query( "SELECT uid, COUNT(*)
@@ -515,7 +607,6 @@ class Xoops2fluxBB {
 			echo "Users group_id are updated." . PHP_EOL . PHP_EOL;
 		}
 
-		$this->close();
 	}
 
 /* ---------------------------------------------------------------------------
@@ -792,16 +883,6 @@ class Xoops2fluxBB {
 	}
 
 	/**
-	 * close 
-	 * 
-	 * @access public
-	 * @return void
-	 */
-	public function close() {
-		mysql_close( $this->_DB );
-	}
-
-	/**
 	 * emptyTable 
 	 * 
 	 * @author Guillaume Kulakowski <guillaume AT llaumgui DOT com>
@@ -909,5 +990,6 @@ class Xoops2fluxBB {
 $conversion = new Xoops2fluxBB();
 $conversion->start();
 $conversion->updategroups();
-$conversion->avatars( '/home/users/xoops/public_html', '/home/users/fluxbb' );
+//$conversion->avatars( '/home/users/xoops/public_html', '/home/users/fluxbb' );
+//$conversion->updateFirstUser( true,  '/home/users/fluxbb' );
 ?>

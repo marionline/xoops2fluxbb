@@ -60,10 +60,10 @@ TODO:
 * check for add conversion for ban user;
 * create documentation
 * check htaccess rewrite rule (add users profile link)
-* check how to convert first 2 users of xoops into fluxbb (fluxbb user id 1 is Guest, id 2 is the first Admin)
 DONE:
 -----
 * translate French comment in English
 * create a function to update group id of users and which group id use if a users has got multiple groups
 * create function to convert xoops avatars to fluxbb avatars
 * check the correct mapping of conversion from old xoops table (cbb also) to fluxbb table
+* check how to convert first 2 users of xoops into fluxbb (fluxbb user id 1 is Guest, id 2 is the first Admin)
