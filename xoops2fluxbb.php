@@ -56,8 +56,12 @@ class Xoops2fluxBB {
 		'groupid'      => array ( 2 => 4, 4 => 2 ), // Xoops register user id is 2, fluxbb legister user is 4
 
 		// Options :
-		'language'    => 'French',     // Default members language
-		'style'       => 'Oxygen',     // Default style for members (Oxygen)
+		'language'    => 'Italian',     // Default members language
+		'style'       => 'Air',     // Default style for members (Oxygen)
+
+		// Path :
+		//'xoops_dir'   => '/home/users/xoops/public_html', // Xoops public directory path
+		//'fluxbb_dir'  => '/home/users/fluxbb', // Fluxbb directory path
 	);
 
 	/**
@@ -171,9 +175,9 @@ class Xoops2fluxBB {
 	 */
 	public function convMember() {
 
-		$this->emptyTable( "users", "WHERE id >= 1" );
+		$this->emptyTable( "users", "WHERE id > 1" );
 
-		$query_result = $this->query( "SELECT * FROM " . $this->_config['xoops_prefix'] . "users ORDER BY uid" );
+		$query_result = $this->query( "SELECT * FROM " . $this->_config['xoops_prefix'] . "users WHERE uid > 1 ORDER BY uid" );
 
 		while ( $member = $this->fetch_array( $query_result ) ) {
 			/*
@@ -399,6 +403,55 @@ class Xoops2fluxBB {
 		}
 
 		echo "Posts migration DONE." . PHP_EOL . PHP_EOL;
+	}
+
+	/**
+	 * avatars 
+	 * 
+	 * @param string $xoops_dir Path to xoops public html directory
+	 * @param string $fluxbb_dir Path to fluxbb directory
+	 * @access public
+	 * @return void
+	 */
+	public function avatars( $xoops_dir = null, $fluxbb_dir = null ) {
+		$this->connect();
+
+		$error = '';
+
+		if( $xoops_dir === null && isset( $this->_config['xoops_dir'] ) ) {
+			$xoops_dir = $this->_config['xoops_dir'];
+		} else {
+			$error .= "Error, wrong xoops path provides." . PHP_EOL;
+		}
+
+		if( $fluxbb_dir === null && isset( $this->_config['fluxbb_dir'] ) ) {
+			$xoops_dir = $this->_config['xoops_dir'];
+		} else {
+			$error .= "Error, wrong fluxbb path provides." . PHP_EOL;
+		}
+
+		if( ( !is_dir( $xoops_dir ) || !is_dir( $fluxbb_dir ) ) && $error == '' ) {
+			$error .= "A provided path is not correct." . PHP_EOL;
+		}
+
+		if( $error == '' ) {
+			echo $error;
+		} else {
+			$query_result = $this->query( "SELECT * FROM " . $this->_config['xoops_prefix'] . "users ORDER BY uid" );
+
+			while ( $member = $this->fetch_array( $query_result ) ) {
+				$avatar = explode('.', $member['user_avatar']);
+				if( file_exists( $xoops_dir . '/uploads/' . $member['user_avatar'] ) ) {
+					copy( $xoops_dir . '/uploads/' . $member['user_avatar'], $fluxbb_dir . '/img/avatars/'.$member['uid'] . '.' . $avatar[1] );
+				} else {
+					echo "Avatar: " . $member['user_avatar'] . " of user: " . $member['uname'] . " doesn't exists, no copy done." . PHP_EOL;
+				}
+			}
+
+			echo "Avatars copy successfull from Xoops to Fluxbb." . PHP_EOL;
+		}
+
+		$this->close();
 	}
 
 	/**
@@ -854,6 +907,7 @@ class Xoops2fluxBB {
  * Call conversion :
  */
 $conversion = new Xoops2fluxBB();
-//$conversion->start();
+$conversion->start();
 $conversion->updategroups();
+$conversion->avatars( '/home/users/xoops/public_html', '/home/users/fluxbb' );
 ?>
