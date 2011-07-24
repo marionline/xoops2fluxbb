@@ -86,6 +86,17 @@ class Xoops2fluxBB {
 	 * @return void
 	 */
 	function __construct() {
+
+	}
+
+	/**
+	 * start 
+	 * Start database migration from xoops to fluxbb
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	public function start() {
 	
 		// Open DB connection.
 		$this->connect();
@@ -101,7 +112,8 @@ class Xoops2fluxBB {
 		// Close DB connection
 		$this->close();
 
-		echo "Migration DONE!" . PHP_EOL;
+		echo "Migration DONE!" . PHP_EOL . "Now you can update groups of the user using updategroups method." . PHP_EOL;
+
 	}
 
 	/**
@@ -150,7 +162,7 @@ class Xoops2fluxBB {
 
 	/**
 	 * convMember 
-	 * Member conversion, need to review avatars move and groupid of all users.
+	 * Member conversion.
 	 * 
 	 * @author Guillaume Kulakowski <guillaume AT llaumgui DOT com>
 	 * @since 0.1
@@ -171,10 +183,6 @@ class Xoops2fluxBB {
 				$show_avatars = 0;
 			} else {
 				$show_avatars = 1;
-				// Need to complete or create another function
-				//$avatar = explode('.', $member['user_avatar']);
-				/* rename('../img/avatars/'.$member['user_avatar'], 
-				   '../img/avatars/'.$member['uid'].'.'.$avatar[1] ); */
 			}
 
 			/*
@@ -184,7 +192,7 @@ class Xoops2fluxBB {
 
 			$tab = array(
 				'id'               => $member['uid'],
-				'group_id'         => 4, // Need a function to convert user xoops groups id to one fluxbb group id
+				'group_id'         => 4,
 				'username'         => $this->parseString( $member['uname'] ),
 				'password'         => $member['pass'],
 				'email'            => $this->parseString( $member['email'] ),
@@ -320,7 +328,7 @@ class Xoops2fluxBB {
 				'poster'       => $this->parseString( $firstPost['uname'] ),
 				'subject'      => $this->parseString( $topic['topic_title'] ),
 				'posted'       => $topic['topic_time'],
-				'first_post_id'=> $fistPost['post_id'];
+				'first_post_id'=> $firstPost['post_id'],
 				'last_post'    => $lastPost['post_time'],
 				'last_post_id' => $lastPost['post_id'],
 				'last_poster'  => $this->parseString( $lastPost['uname'] ),
@@ -393,9 +401,73 @@ class Xoops2fluxBB {
 		echo "Posts migration DONE." . PHP_EOL . PHP_EOL;
 	}
 
+	/**
+	 * updategroups 
+	 * Update group of users in fluxbb table from xoops table. The users with multiple xoops groups are not update.
+	 * 
+	 * @author Mario Santagiuliana <mario at marionline dot it>
+	 * @access public
+	 * @return void
+	 */
+	public function updategroups() {
+		$this->connect();
+
+		// Find users that are in more than one group
+		$result = $this->query( "SELECT uid, COUNT(*)
+			FROM `" . $this->_config['xoops_prefix'] . "groups_users_link`
+			GROUP BY uid
+			HAVING count(*) > 1
+			");
+		if( $this->num_rows( $result ) ) {
+			echo PHP_EOL . "This/these user/users is/are member of more than one xoops groups:" . PHP_EOL;
+		}
+		while ( $user = $this->fetch_array( $result ) ) {
+			// Find user information
+			$info = $this->query( "SELECT * 
+				FROM " . $this->_config['xoops_prefix'] . "users AS u
+				INNER JOIN " . $this->_config['xoops_prefix'] . "groups_users_link AS l
+				ON u.uid = l.uid
+				WHERE l.uid = " . $user['uid'] );
+
+			$info = $this->fetch_array( $info );
+
+			echo "\t" . $info['uname'] . ' (uid=' . $info['uid'] . ').' . PHP_EOL;
+		}
+		if( $this->num_rows( $result ) ) {
+			echo "If you want to change the default group of the this/these user/users you need to do it manually." . PHP_EOL . PHP_EOL;
+		}
+
+		// Find users that are in one xoops group and update in fluxbb table
+		$result = $this->query( "SELECT uid, groupid, COUNT(*)
+			FROM `" . $this->_config['xoops_prefix'] . "groups_users_link`
+			GROUP BY uid
+			HAVING count(*) = 1
+			");
+
+		$when = '';
+		$range = array();
+		while ( $user = $this->fetch_array( $result ) ) {
+			$when .= "WHEN " . $user['uid'] . " THEN " . $this->convertGroupId( $user['groupid'] ) . PHP_EOL ;
+			$range[] = $user['uid'];
+		}
+		$range = "(" . implode( ",  ", $range) . ")";
+		$sql = "UPDATE " . $this->_config['punbb_prefix'] . "users 
+			SET group_id = CASE id 
+				$when 
+			END 
+			WHERE id IN $range";
+
+		if( $this->num_rows( $result ) ) {
+			$this->query( $sql );
+			echo "Users group_id are updated." . PHP_EOL . PHP_EOL;
+		}
+
+		$this->close();
+	}
+
 /* ---------------------------------------------------------------------------
  *
- * Usefull function in migration process :
+ * Usefull functions in migration process :
  *
  * -------------------------------------------------------------------------*/
 
@@ -660,7 +732,7 @@ class Xoops2fluxBB {
 			$this->_config['db_pass']
 		) or die ( "Error in connection with server database..." );
 
-		$this->_DB = mysql_select_db(
+		mysql_select_db(
 			$this->_config['db_name'],
 			$this->_DB
 		) or die ( "Error connection to database " . $this->_config['db_name'] );
@@ -781,6 +853,7 @@ class Xoops2fluxBB {
 /*
  * Call conversion :
  */
-$convertion = new Xoops2fluxBB();
-
+$conversion = new Xoops2fluxBB();
+//$conversion->start();
+$conversion->updategroups();
 ?>

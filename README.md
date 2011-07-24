@@ -61,8 +61,9 @@ TODO:
 	- need to check users conversion and groups;
 	- add conversion for ban user;
 * create documentation
-* create a function to update group id of users and which group id use if a users has got multiple groups
 * create function to convert xoops avatars to fluxbb avatars
+* check htaccess rewrite rule (add users profile link)
 DONE:
 -----
 * translate French comment in English
+* create a function to update group id of users and which group id use if a users has got multiple groups
