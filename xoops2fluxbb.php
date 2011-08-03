@@ -337,6 +337,13 @@ class Xoops2fluxBB {
 		echo "User with id 2 is moved to the last id, user with id 1 in xoops is now Administrator in fluxbb";
 	}
 
+	/**
+	 * convBannedUsers 
+	 * Populate fluxbb table of ban users
+	 * 
+	 * @access public
+	 * @return void
+	 */
 	public function convBannedUsers() {
 
 		$this->emptyTable( "bans" );
