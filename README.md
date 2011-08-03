@@ -57,7 +57,6 @@ http://www.llaumgui.com/post/Version-finale-du-script-de-migration-de-Xoops-vers
 
 TODO:
 -----
-* check for add conversion for ban user;
 * create documentation
 * check htaccess rewrite rule (add users profile link)
 DONE:
@@ -67,3 +66,4 @@ DONE:
 * create function to convert xoops avatars to fluxbb avatars
 * check the correct mapping of conversion from old xoops table (cbb also) to fluxbb table
 * check how to convert first 2 users of xoops into fluxbb (fluxbb user id 1 is Guest, id 2 is the first Admin)
+* check for add conversion for ban user;

@@ -62,6 +62,9 @@ class Xoops2fluxBB {
 		// Path :
 		//'xoops_dir'   => '/home/users/xoops/public_html', // Xoops public directory path
 		//'fluxbb_dir'  => '/home/users/fluxbb', // Fluxbb directory path
+
+		// Group of ban users in xoops:
+		'banned_gid'  => 5,
 	);
 
 	/**
@@ -332,6 +335,34 @@ class Xoops2fluxBB {
 		}
 
 		echo "User with id 2 is moved to the last id, user with id 1 in xoops is now Administrator in fluxbb";
+	}
+
+	public function convBannedUsers() {
+
+		$this->emptyTable( "bans" );
+
+		$query_result = $this->query( "SELECT uname, email 
+			FROM " . $this->_config['xoops_prefix'] . "users AS u
+			INNER JOIN " . $this->_config['xoops_prefix'] . "groups_users_link AS l
+			ON u.uid = l.uid
+			WHERE l.groupid = " . $this->_config['banned_gid'] );
+
+		while ( $member = $this->fetch_array( $query_result ) ) {
+
+			$tab = array(
+				'username'         => $this->parseString( $member['uname'] ),
+				'ip'               => 'NULL',
+				'email'            => $this->parseString( $member['email'] ),
+				'message'          => 'Xoops2fluxBB banned user',
+				'expire'           => 'NULL',
+				'ban_creator'      => 2,
+			);
+
+			$this->query( $this->buidInsert( 'bans', $tab ) );
+		}
+
+		echo "Migration banned users DONE." . PHP_EOL . PHP_EOL;
+
 	}
 
 	/**
@@ -988,8 +1019,10 @@ class Xoops2fluxBB {
  * Call conversion :
  */
 $conversion = new Xoops2fluxBB();
+
 $conversion->start();
 $conversion->updategroups();
-//$conversion->avatars( '/home/users/xoops/public_html', '/home/users/fluxbb' );
-//$conversion->updateFirstUser( true,  '/home/users/fluxbb' );
+$conversion->avatars( '/home/users/xoops/public_html', '/home/users/fluxbb' );
+$conversion->updateFirstUser( true,  '/home/users/fluxbb' );
+$conversion->convBannedUsers();
 ?>
