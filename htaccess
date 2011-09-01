@@ -20,6 +20,9 @@ RewriteRule ^(.*)viewtopic.php(.*)$ fluxbb/viewtopic.php?id=%3&pid=%6 [NC,L,R=30
 # Rewrite Rule for viewforum.php
 RewriteCond %{QUERY_STRING} forum=([0-9]*)
 RewriteRule ^(.*)viewforum.php(.*)$ fluxbb/viewforum.php?id=%1 [NC,L,R=301]
+#
+# Rewrite Rule for search.php newbb engine
+RewriteRule ^(.*)search.php(.*)$ fluxbb/search.php [NC,L,R=301]
 
 # If no matched found redirect to fluxbb index
 RewriteRule ^.*$ fluxbb/ [NC,L,R=301]
