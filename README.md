@@ -77,6 +77,7 @@ http://www.llaumgui.com/post/Version-finale-du-script-de-migration-de-Xoops-vers
 TODO:
 -----
 * check htaccess rewrite rule (add users profile link)
+
 DONE:
 -----
 * translate French comment in English
