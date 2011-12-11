@@ -493,7 +493,7 @@ class Xoops2fluxBB {
 	 * @access public
 	 * @return void
 	 */
-	public function convPost() {
+	public function convPost($lang = NULL) {
 
 		$this->emptyTable( "posts" );
 		$nbPost = '1000'; // traiter les postes par 1000.
@@ -513,13 +513,18 @@ class Xoops2fluxBB {
 				ORDER BY p.post_id" );
 
 			while ( $post = $this->fetch_array($query) ) {
+				if($lang === NULL)
+					$message = $post['post_text'];
+				else
+					$message = preg_replace( '/\[quote\]\r\n(\w+)  ' . $lang . ':/i', '[quote=\1]', $post['post_text']);
+
 				$tab = array(
 					'id'           => $post['post_id'],
 					'poster'       => $this->parseString( $post['uname'] ),
 					'poster_id'    => $post['uid'],
 					'poster_ip'    => long2ip($post['poster_ip']),
 					'poster_email' => 'NULL',
-					'message'      => $this->parseString( $post['post_text'] ),
+					'message'      => $this->parseString( $message ),
 					'hide_smilies' => $this->convertSmiles( $post['dosmiley'] ),
 					'posted'       => $post['post_time'],
 					'edited'       => 'NULL',
@@ -895,7 +900,7 @@ class Xoops2fluxBB {
 	 * @return string
 	 */
 	private function parseString( $string ) {
-		return mysql_escape_string( $string );
+		return mysql_real_escape_string( $string );
 	}
 
 	/**
