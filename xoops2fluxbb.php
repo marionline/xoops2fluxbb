@@ -516,7 +516,7 @@ class Xoops2fluxBB {
 				if($lang === NULL)
 					$message = $post['post_text'];
 				else
-					$message = preg_replace( '/\[quote\]\r\n(\w+)  ' . $lang . ':/i', '[quote=\1]', $post['post_text']);
+					$message = preg_replace( '/\[quote\]\r\n(\w+) ' . $lang . ':/i', '[quote=\1]', $post['post_text']);
 
 				$tab = array(
 					'id'           => $post['post_id'],
