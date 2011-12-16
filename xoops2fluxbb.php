@@ -490,6 +490,7 @@ class Xoops2fluxBB {
 	 * 
 	 * @author Guillaume Kulakowski <guillaume AT llaumgui DOT com>
 	 * @since 0.1
+	 * @param mixed $lang text in the xoops quote
 	 * @access public
 	 * @return void
 	 */
@@ -562,7 +563,7 @@ class Xoops2fluxBB {
 		}
 
 		if( $fluxbb_dir === null && isset( $this->_config['fluxbb_dir'] ) ) {
-			$xoops_dir = $this->_config['xoops_dir'];
+			$fluxbb_dir = $this->_config['fluxbb_dir'];
 		} else {
 			$error .= "Error, wrong fluxbb path provides." . PHP_EOL;
 		}
