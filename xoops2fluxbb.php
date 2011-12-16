@@ -572,7 +572,7 @@ class Xoops2fluxBB {
 			$error .= "A provided path is not correct." . PHP_EOL;
 		}
 
-		if( $error == '' ) {
+		if( $error != '' ) {
 			echo $error;
 		} else {
 			$query_result = $this->query( "SELECT * FROM " . $this->_config['xoops_prefix'] . "users ORDER BY uid" );
